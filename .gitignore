@@ -27,3 +27,8 @@ target
 *.iml
 .idea
 
+.gradle
+gradle
+gradlew
+gradlew.bat
+
