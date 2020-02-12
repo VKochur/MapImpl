@@ -2,7 +2,7 @@ package team.mediasoft.education.kvv.list;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.NoSuchElementException;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -11,7 +11,7 @@ public class TwoDirectionListTest {
     @Test
     void getFirstFromEmpty() {
         TwoDirectionList<String> emptyList = new TwoDirectionList<>();
-        assertThrows(NoSuchElementException.class, () -> emptyList.getFirst());
+        assertThrows(IndexOutOfBoundsException.class, () -> emptyList.getFirst());
     }
 
     @Test
@@ -26,7 +26,7 @@ public class TwoDirectionListTest {
     @Test
     void getLastFromEmpty() {
         TwoDirectionList<String> emptyList = new TwoDirectionList<>();
-        assertThrows(NoSuchElementException.class, () -> emptyList.getLast());
+        assertThrows(IndexOutOfBoundsException.class, () -> emptyList.getLast());
     }
 
     @Test
@@ -75,10 +75,10 @@ public class TwoDirectionListTest {
     @Test
     void addIntoAndOutBorders() {
         TwoDirectionList<String> list = new TwoDirectionList<>();
-        assertThrows(IllegalArgumentException.class, () -> {list.add("", 1);});
+        assertThrows(IndexOutOfBoundsException.class, () -> {list.add("", 1);});
         list.add("1", 0);
-        assertThrows(IllegalArgumentException.class, () -> {list.add("", 2);});
-        assertThrows(IllegalArgumentException.class, () -> {list.add("", -1);});
+        assertThrows(IndexOutOfBoundsException.class, () -> {list.add("", 2);});
+        assertThrows(IndexOutOfBoundsException.class, () -> {list.add("", -1);});
         list.add("2", 1);
         list.add("3", 2);
         list.add("0", 0);
@@ -114,12 +114,12 @@ public class TwoDirectionListTest {
     @Test
     void getByIndex() {
         TwoDirectionList<String> list = new TwoDirectionList<>();
-        assertThrows(NoSuchElementException.class, () -> {list.getByIndex(0);});
+        assertThrows(IndexOutOfBoundsException.class, () -> {list.getByIndex(0);});
         for (int i = 0; i < 10; i++) {
             list.addToLastPlace(String.valueOf(i));
         }
-        assertThrows(IllegalArgumentException.class, ()->{list.getByIndex(-1);});
-        assertThrows(IllegalArgumentException.class, ()->{list.getByIndex(10);});
+        assertThrows(IndexOutOfBoundsException.class, ()->{list.getByIndex(-1);});
+        assertThrows(IndexOutOfBoundsException.class, ()->{list.getByIndex(10);});
         for (int i = 0; i < 10; i++) {
             assertEquals(String.valueOf(i), list.getByIndex(i));
         }

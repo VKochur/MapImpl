@@ -1,31 +1,31 @@
 package team.mediasoft.education.kvv.list;
 
-public class Node<E> {
+class Node<E> {
     private E value;
     private Node<E> previous;
     private Node<E> next;
 
-    public E getValue() {
+    E getValue() {
         return value;
     }
 
-    public void setValue(E value) {
+    void setValue(E value) {
         this.value = value;
     }
 
-    public Node<E> getPrevious() {
+    Node<E> getPrevious() {
         return previous;
     }
 
-    public void setPrevious(Node<E> previous) {
+    void setPrevious(Node<E> previous) {
         this.previous = previous;
     }
 
-    public Node<E> getNext() {
+    Node<E> getNext() {
         return next;
     }
 
-    public void setNext(Node<E> next) {
+    void setNext(Node<E> next) {
         this.next = next;
     }
 }

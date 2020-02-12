@@ -1,7 +1,5 @@
 package team.mediasoft.education.kvv.list;
 
-import java.util.NoSuchElementException;
-
 public class TwoDirectionList<E> {
 
     private Node<E> first;
@@ -10,14 +8,14 @@ public class TwoDirectionList<E> {
 
     public E getFirst() {
         if (isEmpty()) {
-            throw new NoSuchElementException("list is empty");
+            throw new IndexOutOfBoundsException("list is empty");
         }
         return first.getValue();
     }
 
     public E getLast() {
         if (isEmpty()) {
-            throw new NoSuchElementException("list is empty");
+            throw new IndexOutOfBoundsException("list is empty");
         }
         return last.getValue();
     }
@@ -67,7 +65,7 @@ public class TwoDirectionList<E> {
 
     public E add(E element, int index) {
         if ((index < 0) || (index > size)) {
-            throw new IllegalArgumentException("available index's interval is [0; " + size + "]");
+            throw new IndexOutOfBoundsException("available index's interval is [0; " + size + "]");
         }
 
         if (index == 0) {
@@ -101,10 +99,10 @@ public class TwoDirectionList<E> {
 
     public E getByIndex(int index) {
         if (isEmpty()) {
-            throw new NoSuchElementException("list is empty");
+            throw new IndexOutOfBoundsException("list is empty");
         }
         if ((index < 0) || (index >= size)) {
-            throw new IllegalArgumentException("available index's interval is [0; " + (size - 1) + "]");
+            throw new IndexOutOfBoundsException("available index's interval is [0; " + (size - 1) + "]");
         }
         if (index == 0) {
             return getFirst();
