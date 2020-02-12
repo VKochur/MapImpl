@@ -137,4 +137,26 @@ public class TwoDirectionList<E> {
         return node;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder presentation = new StringBuilder("TwoDirectionList{" +
+                "first=" + first.getValue().toString() +
+                ", last=" + last.getValue().toString() +
+                ", size=" + size +
+                '}');
+
+        if (first != null) {
+            Node<E> current = first;
+            presentation.append("[");
+            while (current != null) {
+                presentation.append(current.getValue().toString());
+                current = current.getNext();
+                if (current != null) {
+                    presentation.append(", ");
+                }
+            }
+            presentation.append("]");
+        }
+        return presentation.toString();
+    }
 }
