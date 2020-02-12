@@ -9,7 +9,7 @@ public class Main {
         TwoDirectionList<String> directionList = new TwoDirectionList<>();
         String[] strings = {"sdfsf", "jkhkasf", "jkhwer893r"};
         for (String string : strings) {
-            directionList.addLast(string);
+            directionList.addToLastPlace(string);
         }
 
         System.out.println("you are here");
