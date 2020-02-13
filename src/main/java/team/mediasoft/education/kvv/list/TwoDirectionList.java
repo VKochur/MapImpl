@@ -8,6 +8,10 @@ public class TwoDirectionList<E> {
     private Node<E> last;
     private int size;
 
+    public int getSize() {
+        return size;
+    }
+
     public E getFirst() {
         if (isEmpty()) {
             throw new IndexOutOfBoundsException("list is empty");
@@ -100,20 +104,32 @@ public class TwoDirectionList<E> {
     }
 
     public E getByIndex(int index) {
-        if (isEmpty()) {
-            throw new IndexOutOfBoundsException("list is empty");
-        }
-        if ((index < 0) || (index >= size)) {
-            throw new IndexOutOfBoundsException("available index's interval is [0; " + (size - 1) + "]");
-        }
-        if (index == 0) {
-            return getFirst();
-        }
-        if (index == size - 1) {
-            return getLast();
+        return getNodeByIndex(index).getValue();
+    }
+
+    private Node<E> getNodeByIndex(int index) {
+        IndexOutOfBoundsException excp = checkIndexInterval(index);
+        if (excp != null) {
+            throw excp;
         }
 
-        return getInner(index).getValue();
+        if (index == 0) {
+            return first;
+        }
+        if (index == size - 1) {
+            return last;
+        }
+        return getInner(index);
+    }
+
+    private IndexOutOfBoundsException checkIndexInterval(int index) {
+        if (isEmpty()) {
+            return new IndexOutOfBoundsException("list is empty");
+        }
+        if ((index < 0) || (index >= size)) {
+            return new IndexOutOfBoundsException("available index's interval is [0; " + (size - 1) + "]");
+        }
+        return null;
     }
 
     private Node<E> getInner(int index) {
@@ -137,6 +153,29 @@ public class TwoDirectionList<E> {
         return node;
     }
 
+    /**
+     * Gets the first occurrence of the specified element from this list,
+     * if it is present. If this list does not contain
+     * the element returns false
+     * @param element
+     * @return null if not exists
+     */
+    private Node<E> getFirstNodeOf(E element) {
+        Node<E> current = this.first;
+        while(current != null) {
+            if (Objects.equals(element, current.getValue())) {
+                return current;
+            }
+            current = current.getNext();
+        }
+        return null;
+    }
+
+    /**
+     * if not found, returns -1
+     * @param element
+     * @return
+     */
     public int getFirstIndexOf(E element) {
         final int NOT_FOUND = -1;
 
@@ -153,6 +192,11 @@ public class TwoDirectionList<E> {
         return NOT_FOUND;
     }
 
+    /**
+     * if not found, returns -1
+     * @param element
+     * @return
+     */
     public int getLastIndexOf(E element) {
         final int NOT_FOUND = -1;
 
@@ -171,6 +215,55 @@ public class TwoDirectionList<E> {
 
     public boolean contains(E element) {
         return (getFirstIndexOf(element) != -1);
+    }
+
+    /**
+     * Removes the first occurrence of the specified element from this list,
+     * if it is present (optional operation).  If this list does not contain
+     * the element, it is unchanged.  More formally, removes the element with
+     * the lowest index
+     *
+     * @param element
+     * @return true if deleted, or false
+     */
+    public boolean remove(E element) {
+        Node<E> nodeForDelete = getFirstNodeOf(element);
+        if (nodeForDelete != null) {
+            removeNode(nodeForDelete);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public E removeByIndex(int index) {
+        Node<E> nodeByIndex = getNodeByIndex(index); //IndexOutOfBoundsExcp
+        removeNode(nodeByIndex);
+        return nodeByIndex.getValue();
+    }
+
+    private void removeNode(Node<E> existedNodeForDel) {
+        if (size == 1) {
+         //it's only element
+            first = null;
+            last = null;
+            size = 0;
+        } else {
+            if (existedNodeForDel == first) {
+                first = existedNodeForDel.getNext();
+                first.setPrevious(null);
+            } else {
+                if (existedNodeForDel == last) {
+                    last = existedNodeForDel.getPrevious();
+                    last.setNext(null);
+                } else {
+                    //it's inner node
+                    existedNodeForDel.getPrevious().setNext(existedNodeForDel.getNext());
+                    existedNodeForDel.getNext().setPrevious(existedNodeForDel.getPrevious());
+                }
+            }
+            size--;
+        }
     }
 
     @Override

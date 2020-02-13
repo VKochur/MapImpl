@@ -2,8 +2,6 @@ package team.mediasoft.education.kvv.list;
 
 import org.junit.jupiter.api.Test;
 
-
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TwoDirectionListTest {
@@ -75,10 +73,16 @@ public class TwoDirectionListTest {
     @Test
     void addIntoAndOutBorders() {
         TwoDirectionList<String> list = new TwoDirectionList<>();
-        assertThrows(IndexOutOfBoundsException.class, () -> {list.add("", 1);});
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            list.add("", 1);
+        });
         list.add("1", 0);
-        assertThrows(IndexOutOfBoundsException.class, () -> {list.add("", 2);});
-        assertThrows(IndexOutOfBoundsException.class, () -> {list.add("", -1);});
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            list.add("", 2);
+        });
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            list.add("", -1);
+        });
         list.add("2", 1);
         list.add("3", 2);
         list.add("0", 0);
@@ -114,12 +118,18 @@ public class TwoDirectionListTest {
     @Test
     void getByIndex() {
         TwoDirectionList<String> list = new TwoDirectionList<>();
-        assertThrows(IndexOutOfBoundsException.class, () -> {list.getByIndex(0);});
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            list.getByIndex(0);
+        });
         for (int i = 0; i < 10; i++) {
             list.addToLastPlace(String.valueOf(i));
         }
-        assertThrows(IndexOutOfBoundsException.class, ()->{list.getByIndex(-1);});
-        assertThrows(IndexOutOfBoundsException.class, ()->{list.getByIndex(10);});
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            list.getByIndex(-1);
+        });
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            list.getByIndex(10);
+        });
         for (int i = 0; i < 10; i++) {
             assertEquals(String.valueOf(i), list.getByIndex(i));
         }
@@ -201,5 +211,92 @@ public class TwoDirectionListTest {
         assertFalse(list.contains(obj1));
         list.addToLastPlace(obj1);
         assertTrue(list.contains(obj1));
+    }
+
+    @Test
+    void removeByIndex() {
+        TwoDirectionList<String> list = new TwoDirectionList<>();
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            list.removeByIndex(0);
+        });
+        for (int i = 0; i < 10; i++) {
+            assertEquals(i, list.getSize());
+            list.addToLastPlace(String.valueOf(i));
+        }
+        assertEquals(10, list.getSize());
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            list.removeByIndex(10);
+        });
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            list.removeByIndex(-1);
+        });
+
+        assertEquals("0", list.removeByIndex(0));
+        assertEquals("1", list.removeByIndex(0));
+        assertEquals("9", list.removeByIndex(7));
+        assertEquals("8", list.removeByIndex(6));
+        assertEquals("5", list.removeByIndex(3));
+
+        assertEquals(5, list.getSize());
+
+        String[] expected = {"2", "3", "4", "6", "7"};
+        for (int i = 0; i < expected.length; i++) {
+            assertEquals(expected[i], list.getByIndex(i));
+        }
+
+        for (int i = 0; i < 5; i++) {
+            list.removeByIndex(0);
+        }
+        assertTrue(list.isEmpty());
+    }
+
+    @Test
+    void remove() {
+        TwoDirectionList<String> list = new TwoDirectionList<>();
+        assertFalse(list.remove(""));
+        list.addToLastPlace(null);
+        assertFalse(list.remove(""));
+        assertTrue(list.remove(null));
+        for (int i = 0; i < 5; i++) {
+            list.addToLastPlace(String.valueOf(i));
+        }
+        for (int i = 0; i < 5; i++) {
+            list.addToLastPlace(String.valueOf(i));
+        }
+
+        String[] expected = new String[] {"0", "1", "2", "3", "4", "0", "1", "2", "3", "4"};
+        checkByArray(expected, list);
+
+        //remove inner
+        assertTrue(list.remove("4"));
+        expected = new String[] {"0", "1", "2", "3", "0", "1", "2", "3", "4"};
+        checkByArray(expected, list);
+
+        //remove inner
+        assertTrue(list.remove("3"));
+        expected = new String[] {"0", "1", "2", "0", "1", "2", "3", "4"};
+        checkByArray(expected, list);
+
+        //remove first
+        assertTrue(list.remove("0"));
+        expected = new String[] {"1", "2", "0", "1", "2", "3", "4"};
+        checkByArray(expected, list);
+
+        //remove last
+        assertTrue(list.remove("4"));
+        expected = new String[] {"1", "2", "0", "1", "2", "3"};
+        checkByArray(expected, list);
+
+        for (int i = 0; i < 4; i++) {
+            while(list.remove(String.valueOf(i)));
+        }
+        assertEquals(0, list.getSize());
+    }
+
+    private void checkByArray(String[] expected, TwoDirectionList<String> list) {
+        assertEquals(expected.length, list.getSize());
+        for (int i = 0; i < expected.length; i++) {
+            assertEquals(expected[i], list.getByIndex(i));
+        }
     }
 }
