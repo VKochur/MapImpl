@@ -124,4 +124,82 @@ public class TwoDirectionListTest {
             assertEquals(String.valueOf(i), list.getByIndex(i));
         }
     }
+
+    @Test
+    void getFirstIndexOf() {
+        TwoDirectionList<String> list = new TwoDirectionList<>();
+        assertEquals(-1, list.getFirstIndexOf(null));
+        assertEquals(-1, list.getFirstIndexOf(""));
+        for (int i = 0; i < 10; i++) {
+            list.addToLastPlace(String.valueOf(i));
+        }
+        assertEquals(-1, list.getFirstIndexOf(null));
+        assertEquals(-1, list.getFirstIndexOf("10"));
+        assertEquals(0, list.getFirstIndexOf("0"));
+        assertEquals(6, list.getFirstIndexOf("6"));
+        assertEquals(9, list.getFirstIndexOf("9"));
+
+        list.addToLastPlace(null);
+        assertEquals(10, list.getFirstIndexOf(null));
+
+        for (int i = 0; i < 10; i++) {
+            list.addToLastPlace(String.valueOf(i));
+        }
+        assertEquals(5, list.getFirstIndexOf("5"));
+        list.addToFirstPlace(null);
+        assertEquals(0, list.getFirstIndexOf(null));
+    }
+
+    @Test
+    void getLastIndexOf() {
+        TwoDirectionList list = new TwoDirectionList();
+        assertEquals(-1, list.getLastIndexOf(null));
+        assertEquals(-1, list.getLastIndexOf(""));
+        for (int i = 0; i < 10; i++) {
+            list.addToLastPlace(String.valueOf(i));
+        }
+        assertEquals(-1, list.getLastIndexOf(null));
+        assertEquals(-1, list.getLastIndexOf("10"));
+        assertEquals(0, list.getLastIndexOf("0"));
+        assertEquals(6, list.getLastIndexOf("6"));
+        assertEquals(9, list.getLastIndexOf("9"));
+
+        list.addToLastPlace(null);
+        assertEquals(10, list.getLastIndexOf(null));
+
+        for (int i = 0; i < 10; i++) {
+            list.addToLastPlace(String.valueOf(i));
+        }
+
+        assertEquals(17, list.getLastIndexOf("6"));
+        list.addToLastPlace(null);
+        assertEquals(21, list.getLastIndexOf(null));
+    }
+
+    @Test
+    void contains() {
+        TwoDirectionList<Object> list = new TwoDirectionList<>();
+        assertFalse(list.contains("124"));
+        assertFalse(list.contains(null));
+        assertFalse(list.contains(TwoDirectionList.class));
+
+        list.addToLastPlace("");
+        list.addToLastPlace(new String("2"));
+        list.addToFirstPlace(this.getClass());
+        list.addToLastPlace(10);
+        list.addToLastPlace(128);
+        list.addToLastPlace(null);
+
+        assertTrue(list.contains(""));
+        assertTrue(list.contains("2"));
+        assertTrue(list.contains(this.getClass()));
+        assertTrue(list.contains(Integer.valueOf(10)));
+        assertTrue(list.contains(Integer.valueOf(128)));
+        assertTrue(list.contains(null));
+
+        Object obj1 = new Object();
+        assertFalse(list.contains(obj1));
+        list.addToLastPlace(obj1);
+        assertTrue(list.contains(obj1));
+    }
 }

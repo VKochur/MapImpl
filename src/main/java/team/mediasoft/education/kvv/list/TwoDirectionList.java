@@ -1,5 +1,7 @@
 package team.mediasoft.education.kvv.list;
 
+import java.util.Objects;
+
 public class TwoDirectionList<E> {
 
     private Node<E> first;
@@ -42,7 +44,7 @@ public class TwoDirectionList<E> {
         Node<E> node = new Node<>();
         node.setValue(element);
         if (!isEmpty()) {
-            node.setNext(node);
+            node.setNext(first);
             first.setPrevious(node);
             first = node;
             size++;
@@ -135,26 +137,60 @@ public class TwoDirectionList<E> {
         return node;
     }
 
+    public int getFirstIndexOf(E element) {
+        final int NOT_FOUND = -1;
+
+        int index = 0;
+        Node<E> current = this.first;
+        while(current != null) {
+            if (Objects.equals(element, current.getValue())) {
+                return index;
+            }
+            current = current.getNext();
+            index++;
+        }
+
+        return NOT_FOUND;
+    }
+
+    public int getLastIndexOf(E element) {
+        final int NOT_FOUND = -1;
+
+        int index = size -1;
+        Node<E> current = this.last;
+        while (current != null) {
+            if (Objects.equals(element, current.getValue())) {
+                return index;
+            }
+            current = current.getPrevious();
+            index--;
+        }
+
+        return NOT_FOUND;
+    }
+
+    public boolean contains(E element) {
+        return (getFirstIndexOf(element) != -1);
+    }
+
     @Override
     public String toString() {
-        StringBuilder presentation = new StringBuilder("TwoDirectionList{" +
-                "first=" + first.getValue().toString() +
-                ", last=" + last.getValue().toString() +
-                ", size=" + size +
-                '}');
+            StringBuilder presentation = new StringBuilder("TwoDirectionList{" +
+                    "first=" + ((first != null) ? String.valueOf(first.getValue()) : "null") +
+                    ", last=" + ((last != null) ? String.valueOf(last.getValue()) : "null") +
+                    ", size=" + size +
+                    '}');
 
-        if (first != null) {
             Node<E> current = first;
             presentation.append("[");
             while (current != null) {
-                presentation.append(current.getValue().toString());
+                presentation.append(current.getValue());
                 current = current.getNext();
                 if (current != null) {
                     presentation.append(", ");
                 }
             }
             presentation.append("]");
-        }
-        return presentation.toString();
+            return presentation.toString();
     }
 }
