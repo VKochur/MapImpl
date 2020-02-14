@@ -314,17 +314,20 @@ public class TwoDirectionListTest {
         assertThrows(IndexOutOfBoundsException.class, () -> {list.set("", 0);});
         Object obj1 = new Object();
         Object obj2 = new Object();
+
         list.addToFirstPlace(obj1);
         assertEquals(obj1, list.getByIndex(0));
-        list.set(obj2, 0);
+        assertEquals(obj1, list.set(obj2, 0));
         assertEquals(obj2, list.getByIndex(0));
+
         list.addToLastPlace(obj2);
         assertEquals(obj2, list.getByIndex(1));
-        list.set(obj1, 1);
+        assertEquals(obj2, list.set(obj1, 1));
         assertEquals(obj1, list.getByIndex(1));
+
         list.add(obj2, 1);
         assertEquals(obj2, list.getByIndex(1));
-        list.set(obj1, 1);
+        assertEquals(obj2, list.set(obj1, 1));
         assertEquals(obj1, list.getByIndex(1));
     }
 }

@@ -266,10 +266,17 @@ public class TwoDirectionList<E> {
         }
     }
 
+    /**
+     *
+     * @param newValue
+     * @param index
+     * @return oldValue
+     */
     public E set(E newValue, int index) {
         Node<E> nodeByIndex = getNodeByIndex(index);
+        E oldValue = nodeByIndex.getValue();
         nodeByIndex.setValue(newValue);
-        return newValue;
+        return oldValue;
     }
 
     @Override
