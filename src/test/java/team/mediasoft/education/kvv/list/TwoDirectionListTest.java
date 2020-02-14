@@ -7,14 +7,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TwoDirectionListTest {
 
     @Test
-    void getFirstFromEmpty() {
-        TwoDirectionList<String> emptyList = new TwoDirectionList<>();
-        assertThrows(IndexOutOfBoundsException.class, () -> emptyList.getFirst());
-    }
-
-    @Test
     void getFirst() {
         TwoDirectionList<String> list = new TwoDirectionList<>();
+        assertThrows(IndexOutOfBoundsException.class, () -> list.getFirst());
         list.addToFirstPlace("first");
         assertEquals("first", list.getFirst());
         list.addToFirstPlace("second");
@@ -22,14 +17,9 @@ public class TwoDirectionListTest {
     }
 
     @Test
-    void getLastFromEmpty() {
-        TwoDirectionList<String> emptyList = new TwoDirectionList<>();
-        assertThrows(IndexOutOfBoundsException.class, () -> emptyList.getLast());
-    }
-
-    @Test
     void getLast() {
         TwoDirectionList<String> list = new TwoDirectionList<>();
+        assertThrows(IndexOutOfBoundsException.class, () -> list.getLast());
         list.addToLastPlace("first");
         assertEquals("first", list.getLast());
         list.addToLastPlace("second");
@@ -71,7 +61,12 @@ public class TwoDirectionListTest {
     }
 
     @Test
-    void addIntoAndOutBorders() {
+    void add() {
+        addIntoAndOutBorders();
+        addIntoInner();
+    }
+
+    private void addIntoAndOutBorders() {
         TwoDirectionList<String> list = new TwoDirectionList<>();
         assertThrows(IndexOutOfBoundsException.class, () -> {
             list.add("", 1);
@@ -90,8 +85,7 @@ public class TwoDirectionListTest {
         assertEquals("3", list.getLast());
     }
 
-    @Test
-    void addIntoInner() {
+    private void addIntoInner() {
         TwoDirectionList<String> list = new TwoDirectionList<>();
         for (int i = 0; i < 10; i++) {
             list.addToLastPlace(String.valueOf(i));
@@ -298,5 +292,39 @@ public class TwoDirectionListTest {
         for (int i = 0; i < expected.length; i++) {
             assertEquals(expected[i], list.getByIndex(i));
         }
+    }
+
+    @Test
+    void getSize() {
+        TwoDirectionList list = new TwoDirectionList();
+        for (int i = 0; i < 5; i++) {
+            assertEquals(i, list.getSize());
+            list.add(Integer.valueOf(i), 0);
+        }
+        for (int i = 5; i > 0; i--) {
+            assertEquals(i, list.getSize());
+            list.removeByIndex(0);
+        }
+        assertEquals(0, list.getSize());
+    }
+
+    @Test
+    void set() {
+        TwoDirectionList list = new TwoDirectionList();
+        assertThrows(IndexOutOfBoundsException.class, () -> {list.set("", 0);});
+        Object obj1 = new Object();
+        Object obj2 = new Object();
+        list.addToFirstPlace(obj1);
+        assertEquals(obj1, list.getByIndex(0));
+        list.set(obj2, 0);
+        assertEquals(obj2, list.getByIndex(0));
+        list.addToLastPlace(obj2);
+        assertEquals(obj2, list.getByIndex(1));
+        list.set(obj1, 1);
+        assertEquals(obj1, list.getByIndex(1));
+        list.add(obj2, 1);
+        assertEquals(obj2, list.getByIndex(1));
+        list.set(obj1, 1);
+        assertEquals(obj1, list.getByIndex(1));
     }
 }

@@ -266,6 +266,12 @@ public class TwoDirectionList<E> {
         }
     }
 
+    public E set(E newValue, int index) {
+        Node<E> nodeByIndex = getNodeByIndex(index);
+        nodeByIndex.setValue(newValue);
+        return newValue;
+    }
+
     @Override
     public String toString() {
             StringBuilder presentation = new StringBuilder("TwoDirectionList{" +
