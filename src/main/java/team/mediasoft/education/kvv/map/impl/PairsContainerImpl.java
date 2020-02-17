@@ -1,6 +1,8 @@
-package team.mediasoft.education.kvv.map;
+package team.mediasoft.education.kvv.map.impl;
 
 import team.mediasoft.education.kvv.list.TwoDirectionList;
+import team.mediasoft.education.kvv.map.Pair;
+import team.mediasoft.education.kvv.map.PairsContainer;
 
 import java.util.Objects;
 import java.util.Set;
@@ -13,6 +15,8 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
     private final int DEFAULT_INITIAL_CAPACITY = 10;
     private final int DEFAULT_BASKET_MAX_LENGTH = 10;
 
+    private final double RECONSTRUCT_KOEF = 1.5;
+
     //count rows in table
     private int currentCapacity;
 
@@ -23,11 +27,18 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
     private int size;
 
     /*
-        table :
-        if (twoDirectionList<InnerPair<K,V>> = table[i]) =>
-        for each innerPair :  innerPair.key.hashCode % currentCapacity = i
-     */
+      table :
+      if (twoDirectionList<InnerPair<K,V>> = table[i]) =>
+      for each innerPair :  innerPair.key.hashCode % currentCapacity = i
+   */
     private TwoDirectionList<InnerPair<K, V>>[] table;
+
+    //tester table for need reconstruction
+    private TableTester<K, V> tableTester;
+
+    //reconstructor table
+    private TableReconstructor tableReconstructor;
+
 
     public PairsContainerImpl() {
         init(DEFAULT_INITIAL_CAPACITY, DEFAULT_BASKET_MAX_LENGTH);
@@ -49,6 +60,42 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
 
         size = 0;
         table = createEmptyTable(capacity);
+
+        tableTester = tableTesterByDefault();
+        tableReconstructor = tableReconstructorByDefault();
+    }
+
+    private TableTester<K, V> tableTesterByDefault() {
+        return new TableTester<K, V>() {
+        };
+    }
+
+    public TableTester<K, V> getTableTester() {
+        return tableTester;
+    }
+
+    public void setTableTester(TableTester<K, V> tableTester) {
+        if (tableTester == null) {
+            throw new NullPointerException("tableTester can't be null");
+        } else {
+            this.tableTester = tableTester;
+        }
+    }
+
+    private TableReconstructor tableReconstructorByDefault() {
+        return new TableReconstructorImpl(RECONSTRUCT_KOEF);
+    }
+
+    public TableReconstructor getTableReconstructor() {
+        return tableReconstructor;
+    }
+
+    public void setTableReconstructor(TableReconstructor tableReconstructor) {
+        if (tableReconstructor == null) {
+            throw new NullPointerException("tableReconstruction can't be null");
+        } else {
+            this.tableReconstructor = tableReconstructor;
+        }
     }
 
     private TwoDirectionList<InnerPair<K, V>>[] createEmptyTable(int capacity) {
@@ -93,9 +140,10 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
     }
 
     private void addNewPairInBasket(TwoDirectionList<InnerPair<K, V>> basket, InnerPair<K, V> newPair) {
-        if (needReconstructTable(basket)) {
+        if (needReconstructTable(basket, newPair)) {
             reconstructTable();
             int rowNumber = defineRowNumber(newPair.getKey());
+            //change basket
             basket = table[rowNumber];
         }
         basket.addToLastPlace(newPair);
@@ -103,20 +151,40 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
     }
 
     private void reconstructTable() {
-        //todo implementation
+        TwoDirectionList[] reconstruct = tableReconstructor.reconstruct(unmodifiableTable(table));
+        table = reconstruct;
+        currentCapacity = reconstruct.length;
     }
 
-    private boolean needReconstructTable(TwoDirectionList<InnerPair<K, V>> basket) {
-        return !(basket.getSize() < maxBasketLength);
+    private boolean needReconstructTable(TwoDirectionList<InnerPair<K, V>> basket, InnerPair<K, V> newPair) {
+        return tableTester.needReconstructTable(basket, newPair, maxBasketLength, unmodifiableTable(table));
+    }
+
+    //todo implementation
+    private TwoDirectionList<InnerPair<K, V>>[] unmodifiableTable(TwoDirectionList<InnerPair<K, V>>[] table) {
+
+        return table;
     }
 
     private int defineRowNumber(K key) {
-        return key.hashCode() % currentCapacity;
+        if (key == null) {
+            return 0;
+        } else {
+            return Math.abs(key.hashCode() % currentCapacity);
+        }
     }
 
     @Override
     public V get(K key) {
-        return null;
+        int basketIndex = defineRowNumber(key);
+        InnerPair<K, V> forSearch = new InnerPair<>(key, null);
+        TwoDirectionList<InnerPair<K, V>> basket = table[basketIndex];
+        int firstIndexOf = basket.getFirstIndexOf(forSearch);
+        if (firstIndexOf == -1) {
+            return null;
+        } else {
+            return basket.getByIndex(firstIndexOf).getValue();
+        }
     }
 
     @Override
@@ -141,27 +209,47 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
 
     /**
      * overrided equals, hashCode by only key
+     *
      * @param <K> key's class
      * @param <V> value's class
      */
-    private class InnerPair<K, V> extends Pair<K, V> {
+    public static class InnerPair<K, V> {
+
+        private K key;
+        private V value;
 
         public InnerPair(K key, V value) {
-            setKey(key);
-            setValue(value);
+            this.key = key;
+            this.value = value;
+        }
+
+        public K getKey() {
+            return key;
+        }
+
+        public V getValue() {
+            return value;
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Pair<?, ?> pair = (Pair<?, ?>) o;
-            return Objects.equals(getKey(), pair.getKey());
+            InnerPair<?, ?> innerPair = (InnerPair<?, ?>) o;
+            return Objects.equals(key, innerPair.key);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(getKey());
+            return Objects.hash(key);
+        }
+
+        @Override
+        public String toString() {
+            return "InnerPair{" +
+                    "key=" + key +
+                    ", value=" + value +
+                    '}';
         }
     }
 }

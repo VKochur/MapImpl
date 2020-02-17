@@ -1,8 +1,6 @@
 package team.mediasoft.education.kvv.map;
 
-import java.util.Objects;
-
-class Pair<K,V> {
+public class Pair<K,V> {
 
     K key;
     V value;

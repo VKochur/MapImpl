@@ -1,4 +1,4 @@
-package team.mediasoft.education.kvv.map;
+package team.mediasoft.education.kvv;
 
 import team.mediasoft.education.kvv.list.TwoDirectionList;
 
