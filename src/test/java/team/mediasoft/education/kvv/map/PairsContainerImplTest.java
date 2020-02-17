@@ -96,4 +96,19 @@ class PairsContainerImplTest {
     private String getValueForGood(int i) {
         return "good_" + i;
     }
+
+    @Test
+    void remove() {
+        PairsContainerImpl<WrapperInt, String> pairsContainer = generateData();
+        GoodHash key = new GoodHash();
+        key.setValue(-101);
+        assertNull(pairsContainer.remove(key));
+        assertNull(pairsContainer.remove(getKeyForNull()));
+
+        key = new GoodHash();
+        key.setValue(1);
+        assertEquals(getValueForGood(1), pairsContainer.get(key));
+        assertEquals(getValueForGood(1), pairsContainer.remove(key));
+        assertNull(pairsContainer.get(key));
+    }
 }

@@ -189,7 +189,16 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
 
     @Override
     public V remove(K key) {
-        return null;
+        int basketIndex = defineRowNumber(key);
+        InnerPair<K, V> forSearch = new InnerPair<>(key, null);
+        TwoDirectionList<InnerPair<K, V>> basket = table[basketIndex];
+        int firstIndexOf = basket.getFirstIndexOf(forSearch);
+        if (firstIndexOf == -1) {
+            return null;
+        } else {
+            InnerPair<K, V> deleted = basket.removeByIndex(firstIndexOf);
+            return deleted.getValue();
+        }
     }
 
     @Override
