@@ -10,6 +10,8 @@ import team.mediasoft.education.kvv.map.impl.support.GoodHash;
 import team.mediasoft.education.kvv.map.impl.support.WrapperInt;
 
 import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Stream;
 
 class PairsContainerImplTest {
 
@@ -160,5 +162,39 @@ class PairsContainerImplTest {
         }
 
         assertTrue(pairsContainer.keysSet().isEmpty());
+    }
+
+    @Test
+    void getPairs() {
+        PairsContainer<Integer, String> pairsContainer = new PairsContainerImpl();
+        assertTrue(pairsContainer.getPairs().isEmpty());
+        int countPairs = 30;
+        Set<PairsContainer.Pair> expectedPairs = new HashSet<>();
+        for (int i = 0; i < countPairs; i++) {
+            expectedPairs.add(new PairsContainer.Pair(i, null));
+            pairsContainer.put(i, String.valueOf(i));
+        }
+
+        Set<PairsContainer.Pair<Integer, String>> pairs = pairsContainer.getPairs();
+        for (PairsContainer.Pair<Integer, String> pair : pairs) {
+            Integer key = pair.getKey();
+            assertEquals(String.valueOf(key), pair.getValue());
+        }
+
+        int key = 10;
+        pairsContainer.put(key, "newValue");
+        PairsContainer.Pair<Integer, String> pairByKey = getPairByKey(pairsContainer, key);
+        assertEquals("newValue", pairByKey.getValue());
+
+        for (int i = 0; i < 30; i++) {
+            pairsContainer.remove(i);
+            assertEquals(29 - i, pairsContainer.getPairs().size());
+        }
+        assertTrue(pairsContainer.getPairs().isEmpty());
+    }
+
+    private PairsContainer.Pair<Integer, String> getPairByKey(PairsContainer<Integer, String> pairsContainer, int key) {
+        Stream<PairsContainer.Pair<Integer, String>> stream = pairsContainer.getPairs().stream();
+        return stream.filter(integerStringPair -> integerStringPair.getKey().equals(key)).findFirst().get();
     }
 }

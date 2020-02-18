@@ -1,6 +1,7 @@
 package team.mediasoft.education.kvv.map.impl;
 
 import team.mediasoft.education.kvv.list.TwoDirectionList;
+import team.mediasoft.education.kvv.map.PairsContainer;
 
 
 public interface TableTester<K, V> {
@@ -16,10 +17,10 @@ public interface TableTester<K, V> {
      * @param table baskets
      * @return
      */
-    default boolean needReconstructTable(TwoDirectionList<PairsContainerImpl.InnerPair<K,V>> basketForAdding,
-                                 PairsContainerImpl.InnerPair<K,V> pairForAdding,
+    default boolean needReconstructTable(TwoDirectionList<PairsContainer.Pair<K,V>> basketForAdding,
+                                 PairsContainer.Pair<K,V> pairForAdding,
                                  int maxBasketLength,
-                                 TwoDirectionList<PairsContainerImpl.InnerPair<K,V>>[] table) {
+                                 TwoDirectionList<PairsContainer.Pair<K,V>>[] table) {
 
         return !(basketForAdding.getSize() < maxBasketLength);
     }

@@ -1,11 +1,9 @@
 package team.mediasoft.education.kvv.map.impl;
 
 import team.mediasoft.education.kvv.list.TwoDirectionList;
-import team.mediasoft.education.kvv.map.Pair;
 import team.mediasoft.education.kvv.map.PairsContainer;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
@@ -24,17 +22,16 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
     //max length of basket
     private int maxBasketLength;
 
-    //count pairs
-    private int size;
-
     private HashSet<K> keys;
+    private Set<PairsContainer.Pair<K,V>> pairs;
+
 
     /*
       table :
       if (twoDirectionList<InnerPair<K,V>> = table[i]) =>
       for each innerPair :  innerPair.key.hashCode % currentCapacity = i
    */
-    private TwoDirectionList<InnerPair<K, V>>[] table;
+    private TwoDirectionList<Pair<K, V>>[] table;
 
     //tester table for need reconstruction
     private TableTester<K, V> tableTester;
@@ -61,9 +58,9 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
         currentCapacity = capacity;
         maxBasketLength = basketMaxLength;
 
-        size = 0;
         table = createEmptyTable(capacity);
         keys = new HashSet<>();
+        pairs = new HashSet<>();
 
         tableTester = tableTesterByDefault();
         tableReconstructor = tableReconstructorByDefault();
@@ -102,8 +99,8 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
         }
     }
 
-    private TwoDirectionList<InnerPair<K, V>>[] createEmptyTable(int capacity) {
-        TwoDirectionList<InnerPair<K, V>>[] table = new TwoDirectionList[capacity];
+    private TwoDirectionList<Pair<K, V>>[] createEmptyTable(int capacity) {
+        TwoDirectionList<Pair<K, V>>[] table = new TwoDirectionList[capacity];
         for (int i = 0; i < capacity; i++) {
             table[i] = new TwoDirectionList<>();
         }
@@ -118,11 +115,11 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
      */
     @Override
     public V put(K key, V value) {
-        InnerPair<K, V> newPair = new InnerPair<>(key, value);
+        Pair<K, V> newPair = new Pair<>(key, value);
 
         int rowNumber = defineRowNumber(newPair.getKey());
-        TwoDirectionList<InnerPair<K, V>> basket = table[rowNumber];
-        InnerPair<K, V> oldPair = addedWithCheckForExist(basket, newPair);
+        TwoDirectionList<Pair<K, V>> basket = table[rowNumber];
+        Pair<K, V> oldPair = addedWithCheckForExist(basket, newPair);
         if (oldPair == null) {
             return null;
         } else {
@@ -130,7 +127,7 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
         }
     }
 
-    private InnerPair<K, V> addedWithCheckForExist(TwoDirectionList<InnerPair<K, V>> basket, InnerPair<K, V> newPair) {
+    private Pair<K, V> addedWithCheckForExist(TwoDirectionList<Pair<K, V>> basket, Pair<K, V> newPair) {
         int indexOfExisted = basket.getFirstIndexOf(newPair);
         if (indexOfExisted == -1) {
             //not existed
@@ -138,12 +135,14 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
             return null;
         } else {
             //existed already
-            InnerPair<K, V> oldPair = basket.set(newPair, indexOfExisted);
+            Pair<K, V> oldPair = basket.set(newPair, indexOfExisted);
+            pairs.remove(oldPair);
+            pairs.add(newPair);
             return oldPair;
         }
     }
 
-    private void addNewPairInBasket(TwoDirectionList<InnerPair<K, V>> basket, InnerPair<K, V> newPair) {
+    private void addNewPairInBasket(TwoDirectionList<Pair<K, V>> basket, Pair<K, V> newPair) {
         if (needReconstructTable(basket, newPair)) {
             reconstructTable();
             int rowNumber = defineRowNumber(newPair.getKey());
@@ -152,7 +151,7 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
         }
         basket.addToLastPlace(newPair);
         keys.add(newPair.getKey());
-        size++;
+        pairs.add(newPair);
     }
 
     private void reconstructTable() {
@@ -161,12 +160,12 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
         currentCapacity = reconstruct.length;
     }
 
-    private boolean needReconstructTable(TwoDirectionList<InnerPair<K, V>> basket, InnerPair<K, V> newPair) {
+    private boolean needReconstructTable(TwoDirectionList<Pair<K, V>> basket, Pair<K, V> newPair) {
         return tableTester.needReconstructTable(basket, newPair, maxBasketLength, unmodifiableTable(table));
     }
 
     //todo implementation
-    private TwoDirectionList<InnerPair<K, V>>[] unmodifiableTable(TwoDirectionList<InnerPair<K, V>>[] table) {
+    private TwoDirectionList<Pair<K, V>>[] unmodifiableTable(TwoDirectionList<Pair<K, V>>[] table) {
 
         return table;
     }
@@ -182,8 +181,8 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
     @Override
     public V get(K key) {
         int basketIndex = defineRowNumber(key);
-        InnerPair<K, V> forSearch = new InnerPair<>(key, null);
-        TwoDirectionList<InnerPair<K, V>> basket = table[basketIndex];
+        Pair<K, V> forSearch = new Pair<>(key, null);
+        TwoDirectionList<Pair<K, V>> basket = table[basketIndex];
         int firstIndexOf = basket.getFirstIndexOf(forSearch);
         if (firstIndexOf == -1) {
             return null;
@@ -195,14 +194,15 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
     @Override
     public V remove(K key) {
         int basketIndex = defineRowNumber(key);
-        InnerPair<K, V> forSearch = new InnerPair<>(key, null);
-        TwoDirectionList<InnerPair<K, V>> basket = table[basketIndex];
+        Pair<K, V> forSearch = new Pair<>(key, null);
+        TwoDirectionList<Pair<K, V>> basket = table[basketIndex];
         int firstIndexOf = basket.getFirstIndexOf(forSearch);
         if (firstIndexOf == -1) {
             return null;
         } else {
-            InnerPair<K, V> deleted = basket.removeByIndex(firstIndexOf);
+            Pair<K, V> deleted = basket.removeByIndex(firstIndexOf);
             keys.remove(deleted.getKey());
+            pairs.remove(forSearch);
             return deleted.getValue();
         }
     }
@@ -214,61 +214,14 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
 
     @Override
     public Set<Pair<K, V>> getPairs() {
-
-        return null;
+        return new HashSet<>(pairs);
     }
 
     @Override
     public boolean containsKey(K key) {
         int basketIndex = defineRowNumber(key);
-        InnerPair<K, V> forSearch = new InnerPair<>(key, null);
-        TwoDirectionList<InnerPair<K, V>> basket = table[basketIndex];
+        Pair<K, V> forSearch = new Pair<>(key, null);
+        TwoDirectionList<Pair<K, V>> basket = table[basketIndex];
         return (basket.getFirstIndexOf(forSearch) != -1);
-    }
-
-    /**
-     * overrided equals, hashCode by only key
-     *
-     * @param <K> key's class
-     * @param <V> value's class
-     */
-    public static class InnerPair<K, V> {
-
-        private K key;
-        private V value;
-
-        public InnerPair(K key, V value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        public K getKey() {
-            return key;
-        }
-
-        public V getValue() {
-            return value;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            InnerPair<?, ?> innerPair = (InnerPair<?, ?>) o;
-            return Objects.equals(key, innerPair.key);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(key);
-        }
-
-        @Override
-        public String toString() {
-            return "InnerPair{" +
-                    "key=" + key +
-                    ", value=" + value +
-                    '}';
-        }
     }
 }

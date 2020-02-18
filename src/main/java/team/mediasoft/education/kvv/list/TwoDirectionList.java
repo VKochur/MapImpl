@@ -133,6 +133,7 @@ public class TwoDirectionList<E> {
     }
 
     private Node<E> getInner(int index) {
+        //todo IAE
         int middle = size / 2;
         Node<E> node;
         if (index <= middle) {
@@ -156,7 +157,7 @@ public class TwoDirectionList<E> {
     /**
      * Gets the first occurrence of the specified element from this list,
      * if it is present. If this list does not contain
-     * the element returns false
+     * the element returns null
      * @param element
      * @return null if not exists
      */

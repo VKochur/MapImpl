@@ -3,6 +3,7 @@ package team.mediasoft.education.kvv.map.impl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import team.mediasoft.education.kvv.list.TwoDirectionList;
+import team.mediasoft.education.kvv.map.PairsContainer;
 import team.mediasoft.education.kvv.map.impl.support.BadHash;
 import team.mediasoft.education.kvv.map.impl.support.GoodHash;
 import team.mediasoft.education.kvv.map.impl.support.WrapperInt;
@@ -33,7 +34,7 @@ class TableReconstructorImplTest {
     }
 
     private void checkReconstructWithGoodHash() throws InstantiationException, IllegalAccessException {
-        TwoDirectionList<PairsContainerImpl.InnerPair<? extends GoodHash, String>>[] originalTable = table(GoodHash.class);
+        TwoDirectionList<PairsContainer.Pair<? extends GoodHash, String>>[] originalTable = table(GoodHash.class);
         checkContentWithGoodHash(originalTable);
         final double koef = 1.5;
         TwoDirectionList[] reconstructTable = new TableReconstructorImpl(koef).reconstruct(originalTable);
@@ -47,18 +48,18 @@ class TableReconstructorImplTest {
         checkContentWithGoodHash(reconstructTable);
     }
 
-    private void checkContentWithGoodHash(TwoDirectionList<PairsContainerImpl.InnerPair<? extends GoodHash, String>>[] table) {
+    private void checkContentWithGoodHash(TwoDirectionList<PairsContainer.Pair<? extends GoodHash, String>>[] table) {
         for (int i = 0; i < countPairForAdding; i++) {
             int expectedIndexRow = i % table.length;
-            TwoDirectionList<PairsContainerImpl.InnerPair<? extends GoodHash, String>> expectedList = table[expectedIndexRow];
+            TwoDirectionList<PairsContainer.Pair<? extends GoodHash, String>> expectedList = table[expectedIndexRow];
             GoodHash expectedKey = new GoodHash();
             expectedKey.setValue(i);
-            assertTrue(expectedList.contains(new PairsContainerImpl.InnerPair<>(expectedKey, null)));
+            assertTrue(expectedList.contains(new PairsContainer.Pair<>(expectedKey, null)));
         }
     }
 
     private void checkReconstructWithBadHash() throws InstantiationException, IllegalAccessException {
-        TwoDirectionList<PairsContainerImpl.InnerPair<? extends WrapperInt, String>>[] allPairsInOneRow = table(BadHash.class);
+        TwoDirectionList<PairsContainer.Pair<? extends WrapperInt, String>>[] allPairsInOneRow = table(BadHash.class);
         checkContentWithBadHash(allPairsInOneRow);
         assertThrows(IllegalArgumentException.class, () ->  new TableReconstructorImpl(0.9));
         final double koef = 2.;
@@ -75,17 +76,17 @@ class TableReconstructorImplTest {
         checkContentWithBadHash(reconstructTable);
     }
 
-    private void checkContentWithBadHash(TwoDirectionList<PairsContainerImpl.InnerPair<? extends WrapperInt, String>>[] allPairsInOneRow) {
+    private void checkContentWithBadHash(TwoDirectionList<PairsContainer.Pair<? extends WrapperInt, String>>[] allPairsInOneRow) {
         int expectedRowIndex = BadHash.HASH_CODE_VALUE % capacity;
-        TwoDirectionList<PairsContainerImpl.InnerPair<? extends WrapperInt, String>> aloneFullRow = allPairsInOneRow[expectedRowIndex];
+        TwoDirectionList<PairsContainer.Pair<? extends WrapperInt, String>> aloneFullRow = allPairsInOneRow[expectedRowIndex];
         for (int i = 0; i < countPairForAdding; i++) {
-            PairsContainerImpl.InnerPair<? extends WrapperInt, String> pair = aloneFullRow.getByIndex(i);
+            PairsContainer.Pair<? extends WrapperInt, String> pair = aloneFullRow.getByIndex(i);
             assertTrue(i == pair.getKey().getValue());
         }
     }
 
-    private <E extends WrapperInt> TwoDirectionList<PairsContainerImpl.InnerPair<? extends E, String>>[] table(Class<? extends E> clazz) throws IllegalAccessException, InstantiationException {
-        TwoDirectionList<PairsContainerImpl.InnerPair<? extends E, String>>[] table = new TwoDirectionList[capacity];
+    private <E extends WrapperInt> TwoDirectionList<PairsContainer.Pair<? extends E, String>>[] table(Class<? extends E> clazz) throws IllegalAccessException, InstantiationException {
+        TwoDirectionList<PairsContainer.Pair<? extends E, String>>[] table = new TwoDirectionList[capacity];
 
         //init
         for (int i = 0; i < capacity; i++) {
@@ -95,7 +96,7 @@ class TableReconstructorImplTest {
         for (int i = 0; i < countPairForAdding; i++) {
             E instance = clazz.newInstance();
             instance.setValue(i);
-            PairsContainerImpl.InnerPair<E, String> pair = new PairsContainerImpl.InnerPair<>(instance, String.valueOf(i));
+            PairsContainer.Pair<E, String> pair = new PairsContainer.Pair<>(instance, String.valueOf(i));
             int rowIndex = pair.getKey().hashCode() % capacity;
             table[rowIndex].addToLastPlace(pair);
         }
