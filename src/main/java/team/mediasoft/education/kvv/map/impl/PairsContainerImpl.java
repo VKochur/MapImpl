@@ -4,6 +4,7 @@ import team.mediasoft.education.kvv.list.TwoDirectionList;
 import team.mediasoft.education.kvv.map.Pair;
 import team.mediasoft.education.kvv.map.PairsContainer;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -25,6 +26,8 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
 
     //count pairs
     private int size;
+
+    private HashSet<K> keys;
 
     /*
       table :
@@ -60,6 +63,7 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
 
         size = 0;
         table = createEmptyTable(capacity);
+        keys = new HashSet<>();
 
         tableTester = tableTesterByDefault();
         tableReconstructor = tableReconstructorByDefault();
@@ -147,6 +151,7 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
             basket = table[rowNumber];
         }
         basket.addToLastPlace(newPair);
+        keys.add(newPair.getKey());
         size++;
     }
 
@@ -197,23 +202,28 @@ public class PairsContainerImpl<K, V> implements PairsContainer<K, V> {
             return null;
         } else {
             InnerPair<K, V> deleted = basket.removeByIndex(firstIndexOf);
+            keys.remove(deleted.getKey());
             return deleted.getValue();
         }
     }
 
     @Override
-    public Set<K> keySet() {
-        return null;
+    public Set<K> keysSet() {
+        return new HashSet<>(keys);
     }
 
     @Override
-    public Pair<K, V> getPairs() {
+    public Set<Pair<K, V>> getPairs() {
+
         return null;
     }
 
     @Override
     public boolean containsKey(K key) {
-        return false;
+        int basketIndex = defineRowNumber(key);
+        InnerPair<K, V> forSearch = new InnerPair<>(key, null);
+        TwoDirectionList<InnerPair<K, V>> basket = table[basketIndex];
+        return (basket.getFirstIndexOf(forSearch) != -1);
     }
 
     /**

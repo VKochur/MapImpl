@@ -10,9 +10,9 @@ public interface PairsContainer<K, V> {
 
     V remove(K key);
 
-    Set<K> keySet();
+    Set<K> keysSet();
 
-    Pair<K, V> getPairs();
+    Set<Pair<K, V>> getPairs();
 
     boolean containsKey(K key);
 }
